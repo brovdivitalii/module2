@@ -19,6 +19,23 @@ return new class extends Migration
             $table->date('production_date');
             $table->timestamps();
         });
+
+        // Вставка даних
+        DB::table('products')->insert([
+            [
+                'title' => 'Назва1',
+                'manufacturer' => 'Виробник1',
+                'price' => 10.99,
+                'production_date' => '2023-01-01',
+            ],
+            [
+                'title' => 'Назва2',
+                'manufacturer' => 'Виробник2',
+                'price' => 19.99,
+                'production_date' => '2023-02-15',
+            ],
+            // мош добавити більше при потребі
+        ]);
     }
 
 
@@ -28,6 +45,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('manufacturers');
     }
 };
