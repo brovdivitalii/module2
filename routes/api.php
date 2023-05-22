@@ -1,25 +1,41 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\ManufacturerController;
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+use App\Http\Controllers\API\AuthController;
+use App\Http\Middleware\CheckRole;
+use App\Http\Controllers\ManufacturerController;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+
+
+// Маршрути, які вимагають аутентифікації
+Route::middleware('auth:api')->group(function () {
+    // для перегляду списку всіх виробників
+    Route::get('/manufacturers', [ManufacturerController::class, 'index']);
 });
-Route::get('manufacturers', 'ManufacturerController@index');
-Route::get('manufacturers/{country}', 'ManufacturerController@getByCountry');
+
+// Маршрути, які вимагають аутентифікації та ролі адміністратора або редактора
+Route::middleware('auth:api', 'role:administrator,editor')->group(function () {
+    //  для пошуку виробників за країною
+    Route::get('/manufacturers/{country}', [ManufacturerController::class, 'getByCountry']);
+});
 
 
-Route::get('/manufacturers', [ManufacturerController::class, 'index']);
-Route::get('/manufacturers/{country}', [ManufacturerController::class, 'getByCountry']);
+// Маршрут для реєстрації нового користувача
+Route::post('/register', [AuthController::class, 'register']);
+
+// Маршрут для входу користувача
+Route::post('/login', [AuthController::class, 'login']);
+
+
+Route::middleware('auth:api')->group(function () {
+    // Ваші захищені маршрути
+});
+
+Route::middleware(['auth:api', 'auth.role:admin,editor'])->group(function () {
+    // Ваші захищені маршрути для адміністраторів та редакторів
+});
+Route::middleware('auth:api')->group(function () {
+    Route::get('manufacturers', [ManufacturerController::class, 'index']);
+    Route::get('manufacturers/by-country', [ManufacturerController::class, 'getByCountry'])
+        ->middleware('auth.role:admin,editor');
+});
